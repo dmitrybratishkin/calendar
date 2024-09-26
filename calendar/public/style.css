@@ -1,0 +1,102 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #E6E6FA;
+}
+.month {
+    display: inline-block;
+    width: 250px;
+    margin: 20px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+}
+.month h2 {
+    text-align: center;
+    margin-bottom: 10px;
+}
+.weekdays, .days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+}
+.weekdays div, .days div {
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    font-size: 14px;
+}
+.weekdays div {
+    font-weight: bold;
+}
+.days div {
+    border: 1px solid #ddd;
+}
+.empty {
+    visibility: hidden;
+}
+.lips, .auth-text {
+    align-items: center;
+    text-align: center;
+}
+
+.modal {
+    display: none; /* Скрыто по умолчанию */
+    position: fixed; /* Открытие в центре экрана */
+    z-index: 1; /* Сверху */
+    left: 0;
+    top: 0;
+    width: 100%; /* Полная ширина */
+    height: 100%; /* Полная высота */
+    overflow: auto; /* Включает прокрутку при необходимости */
+    background-color: rgb(0,0,0); /* Черный фон с прозрачностью */
+    background-color: rgba(0,0,0,0.4); /* Слегка прозрачный черный */
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto; /* 15% сверху и снизу */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%; /* Ширина */
+    max-width: 400px; /* Максимальная ширина */
+    border-radius: 5px; /* Закругление углов */
+}
+
+.modal-content form div {
+    margin-bottom: 15px; /* Отступ снизу для отделения полей */
+}
+
+.modal-content label {
+    display: block; /* Делает метку блочным элементом */
+    margin-bottom: 5px; /* Отступ между меткой и полем ввода */
+}
+
+.modal-content input {
+    width: 100%; /* Полное заполнение ширины */
+    padding: 10px; /* Отступ внутри поля ввода */
+    border: 1px solid #ccc; /* Граница */
+    border-radius: 5px; /* Закругление углов */
+    box-sizing: border-box; /* Учитывать отступы и границы в ширине */
+}
+
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.highlight {
+    background-color: #FF69B4; /* Цвет фона для выделения */
+    font-weight: bold;        /* Жирный шрифт */
+}
