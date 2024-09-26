@@ -196,9 +196,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
 document.addEventListener('DOMContentLoaded', function () {
     const logoutButton = document.getElementById('logoutButton');
+    console.log('Logout button:', logoutButton); // Проверка наличия кнопки
     if (logoutButton) {
-        logoutButton.onclick = function() {
-            window.location.href = '../admin/logout.php'; // Создайте файл logout.php для выхода
+        logoutButton.onclick = async function () {
+            try {
+                await fetch('http://calendar/public/logout.php'); // Путь к logout.php
+                location.reload(); // Обновляем страницу
+            } catch (error) {
+                console.error('Ошибка при выходе:', error);
+            }
         };
+    } else {
+        console.warn('Logout button not found'); // Сообщение в консоль, если кнопка не найдена
     }
 });

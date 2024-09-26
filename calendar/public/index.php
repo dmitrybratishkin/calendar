@@ -5,6 +5,10 @@ include '../database.php';
 // Получаем события из базы данных
 $stmt = $pdo->query("SELECT * FROM events");
 $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Проверяем, авторизован ли пользователь
+$isLoggedIn = isset($_SESSION['user_id']);
+$username = $isLoggedIn ? $_SESSION['username'] : ''; // Получаем имя пользователя
 ?>
 
 <!DOCTYPE html>
@@ -20,16 +24,16 @@ $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     <div class="header">
         <h1 class="lips">Хочу увеличить губы, день <span id="days-counter"></span></h1>
-        <div id="userStatus">
-    <?php if (isset($_SESSION['username'])): ?>
-        <span>Добро пожаловать, <?php echo htmlspecialchars($_SESSION['username']); ?>!</span>
+        <div id="user-info">
+    <?php if ($isLoggedIn): ?>
+        <span>Добро пожаловать, <?php echo htmlspecialchars($username); ?>!</span>
         <button id="logoutButton">Выйти</button>
     <?php else: ?>
         <button id="openModal">Вход / Регистрация</button>
     <?php endif; ?>
 </div>
-
     </div>
+
 
     <div id="modal" class="modal">
         <div class="modal-content">
