@@ -55,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php if (isset($error)): ?>
             <p style="color:red;"><?php echo $error; ?></p>
         <?php endif; ?>
-        <p>Уже есть аккаунт? <a href="login.php">Войти</a></p>
+        <p>Уже есть аккаунт? <a href="../login.php">Войти</a></p>
     </div>
 </body>
 </html>

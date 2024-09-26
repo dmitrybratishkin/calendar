@@ -6,9 +6,9 @@ include '../database.php';
 $stmt = $pdo->query("SELECT * FROM events");
 $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Проверяем, авторизован ли пользователь
+// Проверка, авторизован ли пользователь
 $isLoggedIn = isset($_SESSION['user_id']);
-$username = $isLoggedIn ? $_SESSION['username'] : ''; // Получаем имя пользователя
+$username = $isLoggedIn ? $_SESSION['username'] : null; // Получаем имя пользователя
 ?>
 
 <!DOCTYPE html>
@@ -18,20 +18,19 @@ $username = $isLoggedIn ? $_SESSION['username'] : ''; // Получаем имя
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Губехи :)</title>
     <link rel="stylesheet" href="./style.css">
-    <script defer src="./main.js"></script>
 </head>
 <body>
 
     <div class="header">
         <h1 class="lips">Хочу увеличить губы, день <span id="days-counter"></span></h1>
         <div id="user-info">
-    <?php if ($isLoggedIn): ?>
-        <span>Добро пожаловать, <?php echo htmlspecialchars($username); ?>!</span>
-        <button id="logoutButton">Выйти</button>
-    <?php else: ?>
-        <button id="openModal">Вход / Регистрация</button>
-    <?php endif; ?>
-</div>
+            <?php if ($isLoggedIn): ?>
+                <span>Добро пожаловать, <?php echo htmlspecialchars($username); ?>!</span>
+                <button id="logoutButton">Выйти</button>
+            <?php else: ?>
+                <button id="openModal">Вход / Регистрация</button>
+            <?php endif; ?>
+        </div>
     </div>
 
 
@@ -68,5 +67,6 @@ $username = $isLoggedIn ? $_SESSION['username'] : ''; // Получаем имя
 
     <div id="calendar"></div>
 
+    <script src="./main.js"></script>
 </body>
 </html>

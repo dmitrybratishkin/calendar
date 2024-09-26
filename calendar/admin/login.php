@@ -4,7 +4,7 @@ include '../database.php';
 
 // Проверка, зарегистрирован ли пользователь
 if (isset($_SESSION['user_id'])) {
-    header('Location: ../public/index.php'); // Перенаправляем на страницу индекса
+    header('Location: ../public/index.php'); // Изменено на правильный путь
     exit();
 }
 
@@ -21,8 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Проверка пароля
     if ($user && password_verify($password, $user['password'])) {
         $_SESSION['user_id'] = $user['id']; // Установка сессии
-        $_SESSION['username'] = $user['username']; // Сохраняем имя пользователя в сессии
-        header('Location: ../public/index.php'); // Перенаправляем на главную страницу
+        header('Location: ../public/index.php'); // Изменено на правильный путь
         exit();
     } else {
         $error = "Неверное имя пользователя или пароль.";

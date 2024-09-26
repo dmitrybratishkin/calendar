@@ -81,7 +81,6 @@ function calculateDaysSince(targetDate) {
     return daysDifference + 1;
 }
 
-
 // Устанавливаем целевую дату (21 сентября 2024 года)
 const targetDate = new Date('2024-09-21');
 
@@ -99,10 +98,13 @@ document.addEventListener("DOMContentLoaded", function() {
     const registerForm = document.getElementById("registerForm");
     const registrationForm = document.getElementById("registrationForm");
 
-    // Открыть модальное окно
-    openModal.onclick = function() {
-        modal.style.display = "block";
-    };
+    if (openModal) {
+        openModal.onclick = function() {
+            if (modal) {
+                modal.style.display = "block";
+            }
+        };
+    }
 
     // Закрыть модальное окно
     closeModal.onclick = function() {
@@ -127,36 +129,14 @@ document.addEventListener("DOMContentLoaded", function() {
             modal.style.display = "none";
         }
     };
-
-    
 });
 
+// Регистрация
 document.addEventListener("DOMContentLoaded", function () {
-    const openRegister = document.getElementById('openRegister');
-    const openLogin = document.getElementById('openLogin');
-    const authForm = document.getElementById('authForm');
-    const registrationForm = document.getElementById('registrationForm');
-    const modal = document.getElementById('modal');
-    const closeModal = document.getElementById('closeModal');
-
     const regUsernameInput = document.getElementById('regUsername');
     const regPasswordInput = document.getElementById('regPassword');
+    const registrationFormElement = document.getElementById('registrationFormElement');
 
-    openRegister.onclick = function () {
-        authForm.style.display = 'none';
-        registrationForm.style.display = 'block';
-    };
-
-    openLogin.onclick = function () {
-        registrationForm.style.display = 'none';
-        authForm.style.display = 'block';
-    };
-
-    closeModal.onclick = function () {
-        modal.style.display = 'none';
-    };
-
-    const registrationFormElement = document.getElementById('registrationFormElement'); // Получаем элемент после загрузки DOM
     registrationFormElement.onsubmit = async function (event) {
         event.preventDefault();
 
@@ -192,21 +172,21 @@ document.addEventListener("DOMContentLoaded", function () {
     };
 });
 
-
-
-document.addEventListener('DOMContentLoaded', function () {
+// Выход
+document.addEventListener('DOMContentLoaded', function() {
     const logoutButton = document.getElementById('logoutButton');
-    console.log('Logout button:', logoutButton); // Проверка наличия кнопки
     if (logoutButton) {
-        logoutButton.onclick = async function () {
-            try {
-                await fetch('http://calendar/public/logout.php'); // Путь к logout.php
-                location.reload(); // Обновляем страницу
-            } catch (error) {
-                console.error('Ошибка при выходе:', error);
+        logoutButton.onclick = async function() {
+            console.log('Нажата кнопка выхода');
+            const response = await fetch('../public/logout.php'); // Убедитесь в правильности пути
+            console.log('Ответ от logout.php:', response.status);
+            if (response.ok) {
+                window.location.href = 'index.php'; // Перенаправление после выхода
+            } else {
+                console.error('Ошибка при выходе:', response.status);
             }
         };
     } else {
-        console.warn('Logout button not found'); // Сообщение в консоль, если кнопка не найдена
+        console.error('Кнопка выхода не найдена');
     }
 });
