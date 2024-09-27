@@ -1,17 +1,14 @@
 document.addEventListener("DOMContentLoaded", function() {
     const calendarContainer = document.getElementById("calendar");
 
-    // Настройка диапазона месяцев
-    const startMonth = 8; // Сентябрь (0 = январь, поэтому 8 = сентябрь)
+    const startMonth = 8; // Сентябрь
     const endMonth = 3;   // Апрель
     const startYear = 2024;
     const endYear = 2025;
 
-    // Названия дней недели
     const weekdays = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
     const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
 
-    // Функция для создания месяца
     function createMonth(year, month) {
         const monthDiv = document.createElement('div');
         monthDiv.classList.add('month');
@@ -33,26 +30,28 @@ document.addEventListener("DOMContentLoaded", function() {
         daysDiv.classList.add('days');
         monthDiv.appendChild(daysDiv);
 
-        // Получаем количество дней в месяце
         const daysInMonth = new Date(year, month + 1, 0).getDate();
-        const firstDayOfMonth = new Date(year, month, 1).getDay(); // 0 (Вс) - 6 (Сб)
-        const firstWeekdayIndex = (firstDayOfMonth + 6) % 7; // Смещение понедельника на 0
+        const firstDayOfMonth = new Date(year, month, 1).getDay();
+        const firstWeekdayIndex = (firstDayOfMonth + 6) % 7;
 
-        // Пустые ячейки перед началом месяца
         for (let i = 0; i < firstWeekdayIndex; i++) {
             const emptyDiv = document.createElement('div');
             emptyDiv.classList.add('empty');
             daysDiv.appendChild(emptyDiv);
         }
 
-        // Создаем дни месяца
         for (let day = 1; day <= daysInMonth; day++) {
             const dayDiv = document.createElement('div');
             dayDiv.textContent = day;
+            dayDiv.setAttribute('data-date', `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`);
 
-            // Если это апрель и день 7, добавляем стиль
-            if (month === 3 && day === 7) {
-                dayDiv.classList.add('highlight'); // Добавляем класс для выделения
+            // Если пользователь авторизован и у него роль 'admin', делаем дни кликабельными
+            if (isLoggedIn && userRole === 'admin') {
+                dayDiv.addEventListener('click', function() {
+                    openColorModal(this);
+                });
+            } else {
+                dayDiv.classList.add('disabled'); // Для неавторизованных или 'user' делаем дни некликабельными
             }
 
             daysDiv.appendChild(dayDiv);
@@ -61,7 +60,81 @@ document.addEventListener("DOMContentLoaded", function() {
         return monthDiv;
     }
 
-    // Создаем календарь с сентября 2024 по апрель 2025
+    function loadColoredDays() {
+        fetch('load_colored_days.php')
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(item => {
+                    const dayDiv = document.querySelector(`[data-date="${item.date}"]`);
+                    if (dayDiv) {
+                        dayDiv.style.backgroundColor = item.color;
+                    }
+                });
+            });
+    }
+
+    function openColorModal(dayDiv) {
+        const selectedDate = dayDiv.getAttribute('data-date');
+        document.getElementById('selectedDate').innerText = selectedDate;
+        document.getElementById('colorModal').style.display = 'block';
+
+        document.getElementById('removeColor').addEventListener('click', function() {
+            fetch('remove_color.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    date: selectedDate
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const dayDiv = document.querySelector(`[data-date="${selectedDate}"]`);
+                    if (dayDiv) {
+                        dayDiv.style.backgroundColor = '';
+                    }
+                    document.getElementById('colorModal').style.display = 'none';
+                } else {
+                    alert('Ошибка при удалении закрашивания');
+                }
+            });
+        });
+    }
+
+    document.getElementById('closeModal').addEventListener('click', function() {
+        document.getElementById('colorModal').style.display = 'none';
+    });
+
+    document.getElementById('applyColor').addEventListener('click', function() {
+        const selectedDate = document.getElementById('selectedDate').innerText;
+        const selectedColor = document.getElementById('colorPicker').value;
+
+        fetch('save_color.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                date: selectedDate,
+                color: selectedColor
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const dayDiv = document.querySelector(`[data-date="${selectedDate}"]`);
+                if (dayDiv) {
+                    dayDiv.style.backgroundColor = selectedColor;
+                }
+                document.getElementById('colorModal').style.display = 'none';
+            } else {
+                alert('Ошибка при сохранении цвета');
+            }
+        });
+    });
+
     let currentYear = startYear;
     for (let month = startMonth; month <= 11; month++) {
         calendarContainer.appendChild(createMonth(currentYear, month));
@@ -71,7 +144,10 @@ document.addEventListener("DOMContentLoaded", function() {
     for (let month = 0; month <= endMonth; month++) {
         calendarContainer.appendChild(createMonth(currentYear, month));
     }
+
+    loadColoredDays();
 });
+
 
 // Функция для подсчета дней с целевой даты
 function calculateDaysSince(targetDate) {
@@ -214,44 +290,3 @@ document.getElementById('loginForm').onsubmit = function(event) {
     });
 };
 
-// Открытие модального окна при клике на дату
-document.querySelectorAll('.clickable').forEach(function(element) {
-    element.addEventListener('click', function() {
-        var selectedDate = this.getAttribute('data-date');
-        document.getElementById('selectedDate').innerText = selectedDate;
-        document.getElementById('colorModal').style.display = 'block';
-    });
-});
-
-// Закрытие модального окна
-document.getElementById('closeModal').addEventListener('click', function() {
-    document.getElementById('colorModal').style.display = 'none';
-});
-
-// Применение выбранного цвета
-document.getElementById('applyColor').addEventListener('click', function() {
-    var selectedDate = document.getElementById('selectedDate').innerText;
-    var selectedColor = document.getElementById('colorPicker').value;
-
-    // Отправляем запрос на сервер для сохранения выбранного цвета
-    fetch('save_color.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            date: selectedDate,
-            color: selectedColor
-        })
-    }).then(function(response) {
-        return response.json();
-    }).then(function(data) {
-        if (data.success) {
-            // Закрашиваем ячейку выбранным цветом
-            document.querySelector(`[data-date="${selectedDate}"]`).style.backgroundColor = selectedColor;
-            document.getElementById('colorModal').style.display = 'none';
-        } else {
-            alert('Ошибка при сохранении цвета');
-        }
-    });
-});

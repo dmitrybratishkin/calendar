@@ -9,7 +9,7 @@ $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
 // Проверка, авторизован ли пользователь
 $isLoggedIn = isset($_SESSION['user_id']);
 $username = $isLoggedIn ? $_SESSION['username'] : null; // Получаем имя пользователя
-$role = isset($_SESSION['role']) ? $_SESSION['role'] : null;
+$role = $isLoggedIn ? $_SESSION['role'] : null; // или любое другое значение роли
 
 // Получение закрашенных дат из базы данных
 $stmt = $pdo->query("SELECT * FROM calendar_colors");
@@ -17,32 +17,6 @@ $coloredDates = [];
 while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
     $coloredDates[$row['date']] = $row['color'];
 }
-
-// Функция для отображения календаря
-function displayCalendar($year, $month, $coloredDates, $role) {
-    $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
-
-    echo '<table class="calendar">';
-    for ($day = 1; $day <= $daysInMonth; $day++) {
-        $date = "$year-$month-$day";
-        $color = isset($coloredDates[$date]) ? $coloredDates[$date] : '';
-
-        echo '<tr>';
-        echo '<td style="background-color:' . $color . ';"';
-
-        // Если пользователь админ, делаем дату кликабельной
-        if ($role === 'admin') {
-            echo ' class="clickable" data-date="' . $date . '"';
-        }
-
-        echo '>' . $day . '</td>';
-        echo '</tr>';
-    }
-    echo '</table>';
-}
-
-// Пример вызова функции для сентября 2024 года
-displayCalendar(2024, 9, $coloredDates, $role);
 ?>
 
 <!DOCTYPE html>
@@ -111,17 +85,25 @@ displayCalendar(2024, 9, $coloredDates, $role);
     </div>
 </div>
 
-<div id="colorModal" class="modal" style="display:none;">
+    <div id="calendar"></div>
+
+    <!-- Модальное окно для выбора цвета -->
+    <div id="colorModal" class="modal" style="display:none;">
     <div class="modal-content">
         <span class="close" id="closeModal">&times;</span>
         <h2>Выбор цвета для даты: <span id="selectedDate"></span></h2>
         <label for="colorPicker">Выберите цвет:</label>
         <input type="color" id="colorPicker" value="#ff0000">
         <button id="applyColor">Применить</button>
+        <button id="removeColor">Удалить закрашивание</button> <!-- Кнопка для удаления цвета -->
+        <button id="closeModal">Закрыть</button>
     </div>
 </div>
 
-    <div id="calendar"></div>
+<script>
+    const isLoggedIn = <?php echo json_encode($isLoggedIn); ?>;
+    const userRole = <?php echo json_encode($role); ?>;
+</script>
 
     <script src="./main.js"></script>
 </body>

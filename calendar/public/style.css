@@ -129,3 +129,7 @@ body {
 .dropdown-content a:hover {
     background-color: #f1f1f1;
 }
+
+.days .disabled {
+    pointer-events: none; /* Отключает возможность клика */
+}

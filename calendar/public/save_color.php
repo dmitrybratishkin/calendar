@@ -4,7 +4,6 @@ include '../database.php';
 
 // Проверка, является ли пользователь администратором
 if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
-    // Получаем данные из POST-запроса
     $data = json_decode(file_get_contents('php://input'), true);
     $date = $data['date'];
     $color = $data['color'];
