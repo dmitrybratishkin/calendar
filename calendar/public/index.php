@@ -9,6 +9,40 @@ $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
 // Проверка, авторизован ли пользователь
 $isLoggedIn = isset($_SESSION['user_id']);
 $username = $isLoggedIn ? $_SESSION['username'] : null; // Получаем имя пользователя
+$role = isset($_SESSION['role']) ? $_SESSION['role'] : null;
+
+// Получение закрашенных дат из базы данных
+$stmt = $pdo->query("SELECT * FROM calendar_colors");
+$coloredDates = [];
+while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+    $coloredDates[$row['date']] = $row['color'];
+}
+
+// Функция для отображения календаря
+function displayCalendar($year, $month, $coloredDates, $role) {
+    $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
+
+    echo '<table class="calendar">';
+    for ($day = 1; $day <= $daysInMonth; $day++) {
+        $date = "$year-$month-$day";
+        $color = isset($coloredDates[$date]) ? $coloredDates[$date] : '';
+
+        echo '<tr>';
+        echo '<td style="background-color:' . $color . ';"';
+
+        // Если пользователь админ, делаем дату кликабельной
+        if ($role === 'admin') {
+            echo ' class="clickable" data-date="' . $date . '"';
+        }
+
+        echo '>' . $day . '</td>';
+        echo '</tr>';
+    }
+    echo '</table>';
+}
+
+// Пример вызова функции для сентября 2024 года
+displayCalendar(2024, 9, $coloredDates, $role);
 ?>
 
 <!DOCTYPE html>
@@ -23,47 +57,69 @@ $username = $isLoggedIn ? $_SESSION['username'] : null; // Получаем им
 
     <div class="header">
         <h1 class="lips">Хочу увеличить губы, день <span id="days-counter"></span></h1>
+        
         <div id="user-info">
-            <?php if ($isLoggedIn): ?>
+        <?php if ($isLoggedIn): ?>
+            <!-- Выпадающее меню для авторизованных пользователей -->
+            <div class="dropdown">
                 <span>Добро пожаловать, <?php echo htmlspecialchars($username); ?>!</span>
-                <button id="logoutButton">Выйти</button>
-            <?php else: ?>
-                <button id="openModal">Вход / Регистрация</button>
-            <?php endif; ?>
-        </div>
+                <button><?php echo htmlspecialchars($username); ?></button>
+                <div class="dropdown-content">
+                    <?php if ($role === 'admin'): ?>
+                        <a href="admin.php">Админка</a>
+                    <?php endif; ?>
+                    <a href="logout.php">Выйти</a>
+                </div>
+            </div>
+        <?php else: ?>
+            <!-- Кнопка Вход / Регистрация для неавторизованных пользователей -->
+            <button id="openModal">Вход / Регистрация</button>
+        <?php endif; ?>
+    </div>
     </div>
 
 
     <div id="modal" class="modal">
-        <div class="modal-content">
-            <span class="close" id="closeModal">&times;</span>
-            <div id="authForm">
-                <h2>Вход</h2>
-                <form id="loginForm" method="POST" action="../admin/login.php">
-                    <label for="loginUsername">Имя пользователя:</label>
-                    <input type="text" id="loginUsername" name="username" required>
-                    <label for="loginPassword">Пароль:</label>
-                    <input type="password" id="loginPassword" name="password" required>
-                    <button type="submit">Войти</button>
-                </form>
-                <p>Нет аккаунта? <button id="openRegister">Зарегистрироваться</button></p>
-            </div>
+    <div class="modal-content">
+        <span class="close" id="closeModal">&times;</span>
+        <div id="authForm">
+            <h2>Вход</h2>
+            <form id="loginForm" method="POST">
+                <label for="loginUsername">Имя пользователя:</label>
+                <input type="text" id="loginUsername" name="username" required>
+                <label for="loginPassword">Пароль:</label>
+                <input type="password" id="loginPassword" name="password" required>
+                <button type="submit">Войти</button>
+                <div id="error-message" style="color: red;"></div> <!-- Элемент для отображения ошибок -->
+            </form>
+            <p>Нет аккаунта? <button id="openRegister">Зарегистрироваться</button></p>
+        </div>
+        
+        <div id="registrationForm" style="display: none;">
+            <h2>Регистрация</h2>
+            <form id="registrationFormElement">
+                <label for="regUsername">Имя пользователя:</label>
+                <input type="text" id="regUsername" name="username" required>
 
-            <div id="registrationForm" style="display: none;">
-                <h2>Регистрация</h2>
-                <form id="registrationFormElement">
-                    <label for="regUsername">Имя пользователя:</label>
-                    <input type="text" id="regUsername" name="username" required>
+                <label for="regPassword">Пароль:</label>
+                <input type="password" id="regPassword" name="password" required>
 
-                    <label for="regPassword">Пароль:</label>
-                    <input type="password" id="regPassword" name="password" required>
-
-                    <button type="submit">Зарегистрироваться</button>
-                </form>
-                <button id="openLogin">Вернуться к авторизации</button>
-            </div>
+                <button type="submit">Зарегистрироваться</button>
+            </form>
+            <button id="openLogin">Вернуться к авторизации</button>
         </div>
     </div>
+</div>
+
+<div id="colorModal" class="modal" style="display:none;">
+    <div class="modal-content">
+        <span class="close" id="closeModal">&times;</span>
+        <h2>Выбор цвета для даты: <span id="selectedDate"></span></h2>
+        <label for="colorPicker">Выберите цвет:</label>
+        <input type="color" id="colorPicker" value="#ff0000">
+        <button id="applyColor">Применить</button>
+    </div>
+</div>
 
     <div id="calendar"></div>
 

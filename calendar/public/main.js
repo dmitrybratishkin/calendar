@@ -190,3 +190,68 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error('Кнопка выхода не найдена');
     }
 });
+
+document.getElementById('loginForm').onsubmit = function(event) {
+    event.preventDefault(); // предотвращаем стандартное поведение формы
+
+    var formData = new FormData(this);
+
+    fetch('../admin/login.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.href = '../public/index.php'; // Переход на главную страницу после успешного входа
+        } else {
+            document.getElementById('error-message').innerText = data.message; // Показать сообщение об ошибке
+        }
+    })
+    .catch(error => {
+        console.error('Ошибка:', error);
+        document.getElementById('error-message').innerText = 'Ошибка сервера. Попробуйте позже.';
+    });
+};
+
+// Открытие модального окна при клике на дату
+document.querySelectorAll('.clickable').forEach(function(element) {
+    element.addEventListener('click', function() {
+        var selectedDate = this.getAttribute('data-date');
+        document.getElementById('selectedDate').innerText = selectedDate;
+        document.getElementById('colorModal').style.display = 'block';
+    });
+});
+
+// Закрытие модального окна
+document.getElementById('closeModal').addEventListener('click', function() {
+    document.getElementById('colorModal').style.display = 'none';
+});
+
+// Применение выбранного цвета
+document.getElementById('applyColor').addEventListener('click', function() {
+    var selectedDate = document.getElementById('selectedDate').innerText;
+    var selectedColor = document.getElementById('colorPicker').value;
+
+    // Отправляем запрос на сервер для сохранения выбранного цвета
+    fetch('save_color.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            date: selectedDate,
+            color: selectedColor
+        })
+    }).then(function(response) {
+        return response.json();
+    }).then(function(data) {
+        if (data.success) {
+            // Закрашиваем ячейку выбранным цветом
+            document.querySelector(`[data-date="${selectedDate}"]`).style.backgroundColor = selectedColor;
+            document.getElementById('colorModal').style.display = 'none';
+        } else {
+            alert('Ошибка при сохранении цвета');
+        }
+    });
+});

@@ -20,14 +20,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // Проверка пароля
     if ($user && password_verify($password, $user['password'])) {
-        $_SESSION['user_id'] = $user['id']; // Установка сессии
-        header('Location: ../public/index.php'); // Изменено на правильный путь
-        exit();
+        // Устанавливаем сессию для идентификатора пользователя и роли
+        $_SESSION['user_id'] = $user['id'];
+        $_SESSION['username'] = $user['username'];
+        $_SESSION['role'] = $user['role']; // Сохранение роли пользователя в сессию
+
+        $response = ['success' => true]; // Успешный вход
     } else {
-        $error = "Неверное имя пользователя или пароль.";
+        $response = ['success' => false, 'message' => 'Неверное имя пользователя или пароль.']; // Ошибка
     }
+
+    // Возвращаем JSON-ответ
+    echo json_encode($response);
+    exit();
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="ru">
